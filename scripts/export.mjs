@@ -1,0 +1,18 @@
+import { readFile, mkdir, writeFile, cp } from 'node:fs/promises';
+const out = 'exports/tanya23';
+await mkdir(out, {recursive:true});
+const config = JSON.parse(await readFile('content.json','utf8'));
+const core = (await readFile('core.mjs','utf8')).replace(/^export /gm, '');
+const app = (await readFile('app.js','utf8')).replace(/^import .*?;\n/, '');
+const css = await readFile('styles.css','utf8');
+let html = await readFile('index.html','utf8');
+html = html.replace(/  <link rel="manifest".*?\n/, '');
+html = html.replace('  <link rel="stylesheet" href="./styles.css">', `<style>${css}</style>`);
+html = html.replace('  <script type="module" src="./app.js"></script>', '');
+const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
+const script = `${core}\n${app}`.replace(/<\/script/gi, '<\\/script');
+html = html.replace('</body>', `<script id="site-content" type="application/json">${safeConfig}</script><script>${script}</script></body>`);
+await writeFile(`${out}/index.html`, html);
+await cp('assets',`${out}/assets`,{recursive:true});
+await writeFile(`${out}/READ-ME.txt`, 'Откройте index.html в браузере. Для просмотра всех блоков добавьте ?preview=all к адресу. Материалы находятся рядом в папке assets.\n');
+console.log(`Autonomous copy: ${out}/index.html`);
