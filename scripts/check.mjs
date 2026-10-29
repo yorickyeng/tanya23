@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 const root = process.cwd();
-for (const file of ['app.js','core.mjs','scripts/export.mjs','game/engine.js','game/bundle-loader.js','game/sha256.js','game/storage.js','game/isolation.js','game/coi-worker.js']) execFileSync(process.execPath, ['--check', file], {stdio:'inherit'});
+for (const file of ['app.js','core.mjs','scripts/export.mjs','game/engine.js','game/bundle-loader.js','game/sha256.js','game/storage.js','game/isolation.js','game/coi-worker.js','game/buffered-audio.js']) execFileSync(process.execPath, ['--check', file], {stdio:'inherit'});
 const config = JSON.parse(await readFile('content.json', 'utf8'));
 const ids = new Set();
 for (const moment of config.moments) {

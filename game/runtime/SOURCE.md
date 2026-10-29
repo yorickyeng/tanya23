@@ -20,3 +20,5 @@ The `jit` target translates guest x86 blocks to WebAssembly and uses SIMD. A cur
 Wine 6 is the unmodified official compact filesystem from https://www.boxedwine.org/v/26R1/wine6/st/boxedwine.zip. See `LICENSE-Wine.txt`. The original game executable, levels, graphics, and sound bank are unchanged. Video files are omitted from the fast package. The original full package remains recoverable in repository history.
 
 Runtime and source hashes are recorded in `BUILD.json`; archive part hashes are in their manifests.
+
+The host module `../buffered-audio.js` supplies a scheduled Web Audio output backend on HTTP or without shared worklet memory. It uses the same fixed guest buffer geometry and native-clock queue accounting, with independently scheduled audio packets; it does not call the emulator from an audio callback. `audioBackend=buffer` forces this path for validation.

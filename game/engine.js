@@ -1,5 +1,6 @@
 import {loadBundle} from './bundle-loader.js?v=3';
 import {enableIsolation} from './isolation.js?v=3';
+import {installBufferedAudio} from './buffered-audio.js?v=4';
 import {loadLegacySaves,prepareStorage} from './storage.js?v=3';
 
 const stage=document.querySelector('#stage');
@@ -134,8 +135,9 @@ async function main(){
       '-bpp','16','-skipFrameFPS','30','-audioFreq','22050','-env','WINEDEBUG=-all',
       '-w','/home/username/.wine/drive_c/game','/bin/wine','cmd','/c','C:\\start.cmd'],
     canvas,boxedwinePresentSoftwareFrame:present,boxedwineAudioPrimeMs:70,
-    locateFile:path=>new URL('./runtime/jit/'+path,location.href).href,
+    locateFile:path=>new URL('./runtime/jit/'+path+'?v=4',location.href).href,
     preRun:[()=>{
+      installBufferedAudio(window.BoxedwineAudio,()=>HEAPU8,window.Module,{force:new URLSearchParams(location.search).get('audioBackend')==='buffer'});
       FS.writeFile('/wine.zip',root.data,{canOwn:true});FS.writeFile('/game.zip',game.data,{canOwn:true});
       root.data=null;game.data=null;prepareStorage(legacy,log);
     }],
@@ -143,7 +145,7 @@ async function main(){
     onAbort:reason=>fail(new Error(String(reason))),
     onExit:()=>{setPhase('ended');gate.hidden=false;gate.setAttribute('aria-label','Открыть снова');currentAudio()?.suspend().catch(()=>{});}
   };
-  const script=document.createElement('script');script.src='./runtime/jit/boxedwine.js';
+  const script=document.createElement('script');script.src='./runtime/jit/boxedwine.js?v=4';
   script.onerror=()=>fail(new Error('Runtime unavailable'));document.body.append(script);
 }
 main().catch(fail);
