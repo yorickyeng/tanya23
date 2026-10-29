@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="240" viewBox="0 0 300 240" fill="none">
+  <ellipse cx="152" cy="215" rx="109" ry="12" fill="#ead9cb" opacity=".5"/>
+  <path d="M28 73l4-10 4 10 10 4-10 4-4 10-4-10-10-4zM262 135l3-8 3 8 8 3-8 3-3 8-3-8-8-3z" fill="#c68d6c"/>
+  <path d="M226 42c-8-13-25-4-14 9l14 13 15-13c11-13-7-22-15-9z" fill="#dca1aa" transform="rotate(12 226 49)"/>
+  <g stroke="#775748" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="rotate(-9 95 149)">
+      <path d="M57 108h77l-8 99c-17 7-42 7-60 0z" fill="#e6b8a2"/>
+      <path d="M62 143h68l-3 36H65z" fill="#fffaf0" stroke="none"/>
+      <path d="M54 98q40-10 83 0v12H54z" fill="#fffaf0"/>
+      <path d="M61 97v-9q35-8 69 0v9" fill="#fffaf0"/>
+      <path d="M87 155q-1 4 0 5m18-5q-1 4 0 5m-15 5q6 7 12 0"/>
+      <path d="M83 70q-9-10 0-20m17 18q-8-10 0-20" stroke="#bc9982"/>
+      <path d="M78 161h3m30 0h3" stroke="#d3979a" stroke-width="4"/>
+    </g>
+    <g transform="rotate(7 207 157)">
+      <path d="M169 115h72l-7 91q-28 10-57 0z" fill="#f1d8c5"/>
+      <path d="M175 163h60l-3 40q-25 7-52 0z" fill="#c2c4a4" stroke="none"/>
+      <path d="M161 115q43-32 88 0z" fill="#f7d8df"/>
+      <path d="M163 115h85v8h-85z" fill="#fffaf0"/>
+      <path d="M206 106l9-56h7l-9 56" fill="#dca1aa"/>
+      <path d="M194 148v3m18-3v3m-14 6q5 6 10 0"/>
+      <path d="M186 155h3m29 0h3" stroke="#d3979a" stroke-width="4"/>
+      <circle cx="191" cy="192" r="3" fill="#775748" stroke="none"/><circle cx="204" cy="184" r="3" fill="#775748" stroke="none"/><circle cx="220" cy="195" r="3" fill="#775748" stroke="none"/>
+    </g>
+    <path d="M130 197q17-8 35 0l-4 17h-27z" fill="#dca1aa"/>
+    <path d="M130 197q-4-7 4-10-2-10 9-10 5-10 10 0 11 0 9 10 9 3 3 10" fill="#fffaf0"/>
+    <path d="M148 176v-16" stroke="#b56e72"/><path d="M148 159q-7-7 1-13 7 7-1 13z" fill="#e4bc70" stroke="#c68d6c"/>
+  </g>
+  <path d="M52 39q7-10 14 0m-14 0q7 20 14 0" stroke="#c9979b" stroke-width="2" stroke-linecap="round"/>
+</svg>

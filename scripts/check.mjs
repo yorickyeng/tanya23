@@ -9,7 +9,7 @@ const ids = new Set();
 for (const moment of config.moments) {
   if (ids.has(moment.id)) throw new Error(`Duplicate moment: ${moment.id}`);
   ids.add(moment.id);
-  if (!['letter','song','gallery','game'].includes(moment.type)) throw new Error(`Unknown widget: ${moment.type}`);
+  if (!['letter','song','gallery','game','food'].includes(moment.type)) throw new Error(`Unknown widget: ${moment.type}`);
   if (!Number.isFinite(Date.parse(moment.opensAt))) throw new Error(`Invalid time: ${moment.id}`);
   if (moment.published && moment.type === 'song' && !moment.src) throw new Error('Add a song file before publishing the song widget');
   if (moment.published && moment.type === 'gallery' && !moment.items?.length) throw new Error('Add memories before publishing the gallery');

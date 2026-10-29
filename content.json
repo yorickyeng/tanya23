@@ -22,6 +22,112 @@
       "signature": "Обнимаю тебя."
     },
     {
+      "id": "food",
+      "type": "food",
+      "title": "Празднично покушац ❤️",
+      "hint": "Твой вкусный маршрут: напитки, обед и сладенькое в подарок.",
+      "opensAt": "2026-11-13T00:00:00+03:00",
+      "published": true,
+      "eyebrow": "13 ноября · меню именинницы",
+      "heading": "Празднично покушац ❤️",
+      "description": "Вот что можно празднично покушац в твой ДР. Маленькие подарки по пути и рядом с офисом — всё для тебя.",
+      "stages": [
+        {
+          "id": "food-morning",
+          "icon": "☀️",
+          "shortTitle": "По пути",
+          "title": "По пути в офис",
+          "when": "Утром, до работы",
+          "places": [
+            {
+              "id": "surf",
+              "name": "Surf",
+              "icon": "☕",
+              "tag": "Начни день с любимого напитка",
+              "address": "ул. Бутырский Вал, 4",
+              "mapUrl": "https://yandex.ru/maps/-/CXbsNX3M",
+              "addressUrl": "https://yandex.ru/maps/213/moscow/house/ulitsa_butyrskiy_val_4/Z04Ycw9lSkcEQFtvfXt2dn9nZw==/",
+              "mapOid": "61198070521",
+              "gift": "Любой большой напиток бесплатно"
+            },
+            {
+              "id": "pims",
+              "name": "PIMS",
+              "icon": "🧋",
+              "tag": "Или захвати что-нибудь чайное",
+              "address": "площадь Тверская Застава, 4",
+              "mapUrl": "https://yandex.ru/maps/-/CXbs7J4g",
+              "addressUrl": "https://yandex.ru/maps/213/moscow/house/ploshchad_tverskaya_zastava_4/Z04Ycw9hQEcAQFtvfXt2dHhqYA==/",
+              "mapOid": "36704386893",
+              "gift": "Фирменный чайный напиток с топпингом",
+              "condition": "Не забудь заранее скачать приложение PIMS ♡"
+            }
+          ]
+        },
+        {
+          "id": "food-coffee",
+          "icon": "☕",
+          "shortTitle": "На работе",
+          "title": "Кофейная пауза",
+          "when": "В офисе, когда захочется передохнуть",
+          "places": [
+            {
+              "id": "drinkit",
+              "name": "Drinkit",
+              "icon": "☕",
+              "tag": "Твоя маленькая пауза в рабочем дне",
+              "address": "ул. Грузинский Вал, 7",
+              "mapUrl": "https://yandex.ru/maps/?mode=search&text=Москва%2C%20улица%20Грузинский%20Вал%2C%207",
+              "gift": "Бесплатный кофе или напиток на выбор"
+            }
+          ]
+        },
+        {
+          "id": "food-lunch",
+          "icon": "🍱",
+          "shortTitle": "На обед",
+          "title": "Вкусный обед",
+          "when": "В обеденный перерыв",
+          "places": [
+            {
+              "id": "jpan",
+              "name": "J’PAN",
+              "icon": "🍮",
+              "tag": "Обед с праздничным финалом",
+              "address": "Большая Грузинская ул., 76",
+              "mapUrl": "https://yandex.ru/maps/-/CXbszPLi",
+              "addressUrl": "https://yandex.ru/maps/213/moscow/house/bolshaya_gruzinskaya_ulitsa_76/Z04Ycw9mTkIPQFtvfXt2cnliYQ==/",
+              "mapOid": "167507019560",
+              "gift": "Японский именинный десерт",
+              "condition": "В подарок при любом заказе."
+            }
+          ]
+        },
+        {
+          "id": "food-sweet",
+          "icon": "🍰",
+          "shortTitle": "За сладеньким",
+          "title": "Прогулка за сладеньким",
+          "when": "Когда найдётся время на небольшую прогулку",
+          "places": [
+            {
+              "id": "vanlav",
+              "name": "Vanlav",
+              "icon": "🍰",
+              "tag": "Сладенькое, как ты любишь",
+              "address": "1-я Тверская-Ямская ул., 11",
+              "mapUrl": "https://yandex.ru/maps/-/CXbwAGoR",
+              "addressUrl": "https://yandex.ru/maps/213/moscow/house/1_ya_tverskaya_yamskaya_ulitsa_11/Z04Ycw5hSUECQFtvfXt2c3pgbQ==/",
+              "mapOid": "241760750343",
+              "gift": "Авторский сладкий комплимент от шеф-кондитера",
+              "condition": "В подарок при любом заказе.",
+              "loveNote": "А корпусные десерты просить купить строго у парня ♡"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "song",
       "type": "song",
       "title": "Надень наушники",

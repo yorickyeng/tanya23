@@ -7,7 +7,7 @@ const app = (await readFile('app.js','utf8')).replace(/^import .*?;\n/, '');
 const css = await readFile('styles.css','utf8');
 let html = await readFile('index.html','utf8');
 html = html.replace(/  <link rel="manifest".*?\n/, '');
-html = html.replace('  <link rel="stylesheet" href="./styles.css">', `<style>${css}</style>`);
+html = html.replace(/  <link rel="stylesheet" href="\.\/styles\.css(?:\?[^"]*)?">/, `<style>${css}</style>`);
 html = html.replace(/  <script type="module" src="\.\/app\.js(?:\?[^"]*)?"><\/script>/, '');
 const safeConfig = JSON.stringify(config).replace(/</g, '\\u003c');
 const script = `${core}\n${app}`.replace(/<\/script/gi, '<\\/script');

@@ -312,6 +312,86 @@ function renderGallery(moment, context) {
   body.append(grid, dialog);
 }
 
+function externalLink(text, href, className) {
+  const node = link(text, href, className);
+  node.target = '_blank';
+  node.rel = 'noopener noreferrer';
+  return node;
+}
+
+function renderFood(moment, context) {
+  const body = widgetShell(moment, context);
+  const intro = document.querySelector('.widget-intro');
+  const art = el('img', 'food-hero-art');
+  art.src = './assets/birthday-treats.svg';
+  art.alt = '';
+  art.width = 300; art.height = 240;
+  intro.append(art);
+  const nav = el('nav', 'food-day-nav');
+  nav.setAttribute('aria-label', 'Когда хочется вкусненького');
+  moment.stages.forEach(stage => nav.append(link(`${stage.icon} ${stage.shortTitle}`, `#${stage.id}`)));
+  body.append(nav);
+  const note = el('p', 'food-little-note', 'Пять вкусных поводов улыбнуться. Выбирай по настроению — успевать везде необязательно ♡');
+  body.append(note);
+
+  for (const [index, stage] of moment.stages.entries()) {
+    const section = el('section', 'food-stage');
+    section.id = stage.id;
+    section.setAttribute('aria-labelledby', `${stage.id}-title`);
+    const label = el('div', 'food-stage-label');
+    label.append(el('span', 'food-stage-number', `0${index + 1}`));
+    const heading = el('h2', '', stage.title);
+    heading.id = `${stage.id}-title`;
+    label.append(heading, el('p', '', stage.when));
+    section.append(label);
+    const places = el('div', 'food-places');
+    for (const place of stage.places) {
+      const card = el('article', `food-card food-card-${place.id}`);
+      const icon = el('span', 'food-place-icon', place.icon);
+      icon.setAttribute('aria-hidden', 'true');
+      const content = el('div', 'food-place-content');
+      content.append(el('p', 'food-place-tag', place.tag), el('h3', '', place.name));
+      content.append(externalLink(place.address, place.addressUrl || place.mapUrl, 'food-address'));
+      const gift = el('p', 'food-gift');
+      gift.append(el('span', '', 'Твой подарок'), el('strong', '', place.gift));
+      content.append(gift);
+      if (place.condition) content.append(el('p', 'food-condition', place.condition));
+      if (place.loveNote) content.append(el('p', 'food-love-note', place.loveNote));
+      const actions = el('div', 'food-actions');
+      const routeURL = new URL('https://yandex.ru/maps/');
+      routeURL.search = new URLSearchParams({mode: 'routes', rtext: `~Москва, ${place.address}`, rtt: 'pd'});
+      const walk = externalLink('Идём пешком ↗', routeURL.href, 'food-walk');
+      walk.setAttribute('aria-label', `Пеший маршрут до ${place.name} в Яндекс Картах (новая вкладка)`);
+      const details = el('details', 'food-map');
+      const summary = el('summary', '', 'На карте');
+      summary.setAttribute('aria-label', `${place.name} — показать карту`);
+      details.append(summary);
+      details.addEventListener('toggle', () => {
+        if (!details.open || details.querySelector('iframe')) return;
+        const frame = el('iframe', 'food-map-frame');
+        frame.title = `${place.name}, ${place.address} — Яндекс Карты`;
+        frame.loading = 'lazy';
+        frame.referrerPolicy = 'no-referrer-when-downgrade';
+        const params = place.mapOid
+          ? new URLSearchParams({ol: 'biz', oid: place.mapOid, z: '16'})
+          : new URLSearchParams({mode: 'search', text: `Москва, ${place.address}`, z: '16'});
+        frame.src = `https://yandex.ru/map-widget/v1/?${params}`;
+        details.append(frame);
+        details.append(externalLink('Открыть в Яндекс Картах ↗', place.mapUrl, 'food-map-external'));
+      });
+      actions.append(walk, details);
+      content.append(actions);
+      card.append(icon, content);
+      places.append(card);
+    }
+    section.append(places);
+    body.append(section);
+  }
+  const ending = el('aside', 'food-ending');
+  ending.append(el('span', 'food-ending-heart', '♡'), el('p', '', 'Пусть даже рабочий день будет немножко праздником.'), el('span', '', 'И очень вкусным. Обнимаю!'));
+  body.append(ending);
+}
+
 function renderLocked(context) {
   document.body.className = 'home-page';
   document.title = config.title;
@@ -325,7 +405,7 @@ function render() {
   if (!momentID) { renderHome(context); return; }
   const moment = visibleMoments(config, context).find(item => item.id === momentID);
   if (!moment) { renderLocked(context); return; }
-  const renderers = {letter: renderLetter, song: renderSong, gallery: renderGallery,
+  const renderers = {letter: renderLetter, song: renderSong, gallery: renderGallery, food: renderFood,
     game: () => location.replace(route(moment.id))};
   (renderers[moment.type] || (() => renderLocked(context)))(moment, context);
 }
