@@ -26,8 +26,15 @@ export async function loadBundle(manifestUrl, {onProgress = () => {}, signal} = 
       if (!result.ok) throw new Error(`Файл игры недоступен (${result.status}): ${part.url}`);
       const bytes = new Uint8Array(await result.arrayBuffer());
       if (bytes.length !== part.bytes) throw new Error(`Файл загружен не полностью: ${part.url}`);
-      const digest = await crypto.subtle.digest('SHA-256', bytes);
-      const hash = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
+      // WebCrypto is unavailable on an HTTP custom domain. Keep the same
+      // integrity check there using a local, portable SHA-256 implementation.
+      let digest;
+      if (globalThis.crypto?.subtle) digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+      else {
+        const {sha256} = await import('./sha256.js');
+        digest = sha256(bytes);
+      }
+      const hash = Array.from(digest, b => b.toString(16).padStart(2, '0')).join('');
       if (hash !== part.sha256) throw new Error(`Проверка файла не пройдена: ${part.url}. Обнови страницу.`);
       data.set(bytes, offsets[index]);
       received += bytes.length;

@@ -4,7 +4,7 @@ import {webcrypto,createHash} from 'node:crypto';
 import {loadBundle} from '../game/bundle-loader.js';
 
 globalThis.location={href:'https://example.test/tanya23/game/index.html'};
-if(!globalThis.crypto)Object.defineProperty(globalThis,'crypto',{value:webcrypto});
+if(!globalThis.crypto)Object.defineProperty(globalThis,'crypto',{value:webcrypto,configurable:true});
 const originalFetch=globalThis.fetch;
 const blocks=[new TextEncoder().encode('first'),new TextEncoder().encode('second'),new TextEncoder().encode('third')];
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -34,3 +34,18 @@ test('rejects altered archive bytes',async()=>{setup({badHash:true});try{await a
 test('rejects incomplete downloads',async()=>{setup({short:true});try{await assert.rejects(loadBundle('assets/game/manifest.json'),/не полностью/);}finally{globalThis.fetch=originalFetch;}});
 test('reports missing hosted assets',async()=>{setup({missing:true});try{await assert.rejects(loadBundle('assets/game/manifest.json'),/404/);}finally{globalThis.fetch=originalFetch;}});
 test('rejects unexpected cross-origin parts',async()=>{setup({external:true});try{await assert.rejects(loadBundle('assets/game/manifest.json'),/другом сайте/);}finally{globalThis.fetch=originalFetch;}});
+test('loads checked files on HTTP without WebCrypto',async()=>{
+  setup(); const descriptor=Object.getOwnPropertyDescriptor(globalThis,'crypto');
+  Object.defineProperty(globalThis,'crypto',{value:{},configurable:true});
+  try{
+    const {data}=await loadBundle('assets/game/manifest.json');
+    assert.equal(new TextDecoder().decode(data),'firstsecondthird');
+  }finally{Object.defineProperty(globalThis,'crypto',descriptor);globalThis.fetch=originalFetch;}
+});
+test('portable SHA-256 matches the native hash across block boundaries',async()=>{
+  const {sha256}=await import('../game/sha256.js');
+  for(const size of [0,1,55,56,63,64,65,1024,1024*1024]){
+    const bytes=Uint8Array.from({length:size},(_,i)=>(i*31+17)&255);
+    assert.equal(Buffer.from(sha256(bytes)).toString('hex'),hash(bytes));
+  }
+});

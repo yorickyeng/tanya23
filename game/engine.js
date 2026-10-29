@@ -1,4 +1,4 @@
-import {loadBundle} from './bundle-loader.js';
+import {loadBundle} from './bundle-loader.js?v=2';
 
 const stage = document.querySelector('#stage');
 const canvas = document.querySelector('#canvas');
