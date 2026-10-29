@@ -37,6 +37,14 @@
       "lyrics": []
     },
     {
+      "id": "surprise",
+      "type": "game",
+      "title": "Ещё кое-что",
+      "hint": "Можно немного отвлечься.",
+      "opensAt": "2026-11-13T00:00:00+03:00",
+      "published": true
+    },
+    {
       "id": "memories",
       "type": "gallery",
       "title": "Наши маленькие моменты",

@@ -1,14 +1,15 @@
 import { readFile, stat } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 const root = process.cwd();
-for (const file of ['app.js','core.mjs','scripts/export.mjs']) execFileSync(process.execPath, ['--check', file], {stdio:'inherit'});
+for (const file of ['app.js','core.mjs','scripts/export.mjs','game/engine.js','game/bundle-loader.js']) execFileSync(process.execPath, ['--check', file], {stdio:'inherit'});
 const config = JSON.parse(await readFile('content.json', 'utf8'));
 const ids = new Set();
 for (const moment of config.moments) {
   if (ids.has(moment.id)) throw new Error(`Duplicate moment: ${moment.id}`);
   ids.add(moment.id);
-  if (!['letter','song','gallery'].includes(moment.type)) throw new Error(`Unknown widget: ${moment.type}`);
+  if (!['letter','song','gallery','game'].includes(moment.type)) throw new Error(`Unknown widget: ${moment.type}`);
   if (!Number.isFinite(Date.parse(moment.opensAt))) throw new Error(`Invalid time: ${moment.id}`);
   if (moment.published && moment.type === 'song' && !moment.src) throw new Error('Add a song file before publishing the song widget');
   if (moment.published && moment.type === 'gallery' && !moment.items?.length) throw new Error('Add memories before publishing the gallery');
@@ -22,4 +23,17 @@ for (const moment of config.moments) {
 }
 JSON.parse(await readFile('manifest.webmanifest','utf8'));
 for (const file of ['index.html','moment.html','styles.css','.nojekyll','assets/icon.svg']) await stat(file);
-console.log('Checks passed: scripts, schedule, unique IDs and media references.');
+for (const file of ['game/index.html','game/screen.css','game/runtime/boxedwine.js','game/runtime/boxedwine.wasm',
+  'game/runtime/browserfs.boxedwine.js','game/assets/codec/ir50_32.dll']) await stat(file);
+for (const archive of ['wine','game']) {
+  const base = path.resolve(root,'game','assets',archive);
+  const manifest = JSON.parse(await readFile(path.join(base,'manifest.json'),'utf8'));
+  if (manifest.parts.reduce((sum,part) => sum + part.bytes,0) !== manifest.bytes) throw new Error(`Invalid archive size: ${archive}`);
+  for (const part of manifest.parts) {
+    const file = path.resolve(base,part.url);
+    if (!file.startsWith(base + path.sep)) throw new Error('Archive part escapes its folder');
+    if ((await stat(file)).size !== part.bytes) throw new Error(`Incomplete archive part: ${file}`);
+    if (createHash('sha256').update(await readFile(file)).digest('hex') !== part.sha256) throw new Error(`Changed archive part: ${file}`);
+  }
+}
+console.log('Checks passed: scripts, schedule, media and complete local game archives.');

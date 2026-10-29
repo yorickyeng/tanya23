@@ -1,0 +1,17 @@
+{
+  "title": "Wine 1.7.55 · Погоня",
+  "bytes": 12540033,
+  "sha256": "5d56c02190869ba451917466a91b624e0db97d54d94f95b3a1ebbb51e866e981",
+  "parts": [
+    {
+      "url": "part-000.bin",
+      "bytes": 8388608,
+      "sha256": "d9af38d2eb56e1d6e9521ca98f34a93798464b648dda6181d39aa309472587eb"
+    },
+    {
+      "url": "part-001.bin",
+      "bytes": 4151425,
+      "sha256": "01415501cb11367ebc6eebe4202b549fb71df67f816f87a48464f977f8a5ab27"
+    }
+  ]
+}

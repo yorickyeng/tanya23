@@ -24,6 +24,9 @@ function link(text, href, className) {
 function route(id, search = location.search) {
   const params = new URLSearchParams(search);
   params.delete('id');
+  if (id && config?.moments.some(moment => moment.id === id && moment.type === 'game')) {
+    return `./game/${params.size ? '?' + params.toString() : ''}`;
+  }
   if (id) params.set('id', id);
   const file = id && !embedded ? 'moment.html' : 'index.html';
   return `./${file}${params.size ? '?' + params.toString() : ''}`;
@@ -321,7 +324,8 @@ function render() {
   if (!momentID) { renderHome(context); return; }
   const moment = visibleMoments(config, context).find(item => item.id === momentID);
   if (!moment) { renderLocked(context); return; }
-  const renderers = {letter: renderLetter, song: renderSong, gallery: renderGallery};
+  const renderers = {letter: renderLetter, song: renderSong, gallery: renderGallery,
+    game: () => location.replace(route(moment.id))};
   (renderers[moment.type] || (() => renderLocked(context)))(moment, context);
 }
 
