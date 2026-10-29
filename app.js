@@ -400,12 +400,166 @@ function renderLocked(context) {
   app.setAttribute('aria-busy', 'false');
 }
 
+function renderInvitation(moment, context) {
+  const body = widgetShell(moment, context);
+  const intro = app.querySelector('.widget-intro');
+  const questions = moment.questions;
+  // Author previews must not unlock the recipient's real invitation on the same device.
+  const mode = context.isPreview ? `preview:${pageParams.get('preview')}` : context.isReplay ? 'replay' : 'live';
+  const storageKey = `tanya23:invitation:${moment.id}:${moment.opensAt}:v${moment.quizVersion}:${mode}`;
+  let step = 0;
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey));
+    if (Number.isInteger(saved) && saved >= 0 && saved <= questions.length) step = saved;
+  } catch { /* The quiz also works when browser storage is unavailable. */ }
+
+  function saveStep() {
+    try { localStorage.setItem(storageKey, JSON.stringify(step)); } catch { /* Keep progress in memory. */ }
+  }
+
+  function focusHeading() {
+    const heading = body.querySelector('h2');
+    heading.tabIndex = -1;
+    heading.focus({preventScroll: true});
+    if (body.getBoundingClientRect().top < 0) body.scrollIntoView({block: 'start'});
+  }
+
+  function showInvitation(focus = false) {
+    intro.querySelector('.eyebrow').textContent = moment.invitation.eyebrow;
+    intro.querySelector('h1').textContent = moment.invitation.heading;
+    intro.querySelector('.intro-description').hidden = true;
+    const invite = moment.invitation;
+    const fragment = document.createDocumentFragment();
+    const figure = el('figure', 'dinner-view');
+    const photo = el('img');
+    photo.src = mediaURL(invite.photo.src, document.baseURI);
+    photo.alt = invite.photo.alt;
+    photo.width = 1680; photo.height = 840;
+    photo.decoding = 'async';
+    const caption = el('figcaption');
+    caption.append(el('span', '', invite.photo.caption), link(invite.photo.credit, invite.photo.sourceUrl));
+    figure.append(photo, caption);
+    fragment.append(figure);
+    const ticket = el('article', 'dinner-ticket');
+    const letter = el('div', 'dinner-letter');
+    letter.append(el('p', 'eyebrow', 'У нас с тобой свидание'), el('h2', '', invite.venue), el('p', '', invite.message));
+    letter.append(el('p', 'dinner-love-note', invite.note));
+    const details = el('div', 'dinner-details');
+    const date = el('time', 'dinner-date', invite.dateLabel);
+    date.dateTime = invite.startsAt;
+    const time = el('time', 'dinner-time', formatTime(invite.startsAt, config.timezone));
+    time.dateTime = invite.startsAt;
+    details.append(date, time, el('span', 'dinner-timezone', 'по московскому времени'));
+    details.append(el('p', 'dinner-booked', 'Столик уже забронирован ♡'));
+    const address = el('address', 'dinner-address');
+    address.append(el('span', '', invite.address), el('span', '', invite.locationNote));
+    details.append(address, link('Посмотреть на карте ↗', invite.mapUrl, 'dinner-map'));
+    ticket.append(letter, details);
+    fragment.append(ticket);
+    const sources = el('details', 'dinner-sources');
+    sources.append(el('summary', '', 'Истории за подсказками'));
+    const list = el('ul');
+    for (const source of invite.sources) {
+      const item = el('li');
+      item.append(link(source.label, source.url));
+      list.append(item);
+    }
+    sources.append(list, el('p', '', invite.sourceNote));
+    fragment.append(sources);
+    const restart = el('button', 'dinner-restart', 'Пройти мини-тест ещё раз');
+    restart.type = 'button';
+    restart.addEventListener('click', () => {
+      step = 0;
+      saveStep();
+      intro.querySelector('.eyebrow').textContent = moment.eyebrow;
+      intro.querySelector('h1').textContent = moment.heading;
+      intro.querySelector('.intro-description').hidden = false;
+      showQuestion(true);
+    });
+    fragment.append(restart);
+    body.replaceChildren(fragment);
+    if (focus) focusHeading();
+  }
+
+  function showQuestion(focus = false) {
+    const question = questions[step];
+    const card = el('article', 'dinner-quiz');
+    const top = el('div', 'quiz-top');
+    top.append(el('span', '', 'Маленькая тайна на двоих'), el('span', '', `${step + 1} / ${questions.length}`));
+    const progress = el('div', 'quiz-progress');
+    progress.setAttribute('role', 'progressbar');
+    progress.setAttribute('aria-label', 'Собрано подсказок');
+    progress.setAttribute('aria-valuemin', '0');
+    progress.setAttribute('aria-valuemax', String(questions.length));
+    progress.setAttribute('aria-valuenow', String(step));
+    for (let index = 0; index < questions.length; index++) {
+      const dot = el('span', index < step ? 'is-collected' : index === step ? 'is-current' : '');
+      progress.append(dot);
+    }
+    const star = el('span', 'quiz-star', '✧');
+    star.setAttribute('aria-hidden', 'true');
+    card.append(top, progress, star, el('p', 'quiz-kicker', question.kicker));
+    const heading = el('h2', '', question.question);
+    heading.id = 'quiz-question';
+    card.append(heading);
+    const options = el('div', 'quiz-options');
+    options.setAttribute('role', 'group');
+    options.setAttribute('aria-labelledby', heading.id);
+    const feedback = el('div', 'quiz-feedback');
+    feedback.setAttribute('role', 'status');
+    feedback.setAttribute('aria-live', 'polite');
+    const next = el('button', 'quiz-next', step === questions.length - 1 ? 'Открыть моё приглашение ♡' : 'Следующая подсказка →');
+    next.type = 'button';
+    next.hidden = true;
+    let answered = false;
+    question.options.forEach((option, index) => {
+      const button = el('button', 'quiz-option');
+      button.type = 'button';
+      button.append(el('span', 'quiz-option-number', String(index + 1).padStart(2, '0')), el('span', '', option));
+      button.addEventListener('click', () => {
+        if (answered) return;
+        if (index !== question.answer) {
+          button.disabled = true;
+          button.classList.add('is-wrong');
+          feedback.className = 'quiz-feedback is-hint';
+          feedback.replaceChildren(el('strong', '', 'Держи маленькую подсказку'), el('p', '', question.hint));
+          return;
+        }
+        answered = true;
+        button.classList.add('is-correct');
+        for (const optionButton of options.children) optionButton.disabled = true;
+        progress.setAttribute('aria-valuenow', String(step + 1));
+        progress.children[step].className = 'is-collected';
+        feedback.className = 'quiz-feedback is-success';
+        feedback.replaceChildren(el('strong', '', 'Именно ♡'), el('p', '', question.fact));
+        next.hidden = false;
+        next.focus({preventScroll: true});
+      });
+      options.append(button);
+    });
+    next.addEventListener('click', () => {
+      if (!answered) return;
+      step++;
+      saveStep();
+      if (step === questions.length) showInvitation(true);
+      else showQuestion(true);
+    });
+    card.append(options, feedback, next);
+    const note = el('p', 'quiz-note', 'Можно угадывать и ошибаться. Я буду подсказывать ♡');
+    body.replaceChildren(card, note);
+    if (focus) focusHeading();
+  }
+
+  if (step === questions.length) showInvitation();
+  else showQuestion();
+}
+
 function render() {
   const context = getContext(location.search, Date.now(), config);
   if (!momentID) { renderHome(context); return; }
   const moment = visibleMoments(config, context).find(item => item.id === momentID);
   if (!moment) { renderLocked(context); return; }
-  const renderers = {letter: renderLetter, song: renderSong, gallery: renderGallery, food: renderFood,
+  const renderers = {letter: renderLetter, song: renderSong, gallery: renderGallery, food: renderFood, invitation: renderInvitation,
     game: () => location.replace(route(moment.id))};
   (renderers[moment.type] || (() => renderLocked(context)))(moment, context);
 }

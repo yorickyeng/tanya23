@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {getContext,visibleMoments,clockTime,mediaURL} from '../core.mjs';
 const config = {birthday:'2026-11-13',archiveAt:'2026-11-14T00:00:00+03:00',moments:[
   {id:'midnight',published:true,opensAt:'2026-11-13T00:00:00+03:00'},
@@ -41,4 +42,16 @@ test('Media paths preserve the GitHub Pages project prefix',()=>{
   assert.equal(mediaURL('./assets/audio/song.mp3','https://example.github.io/tanya23/moment.html'), 'https://example.github.io/tanya23/assets/audio/song.mp3');
   assert.throws(()=>mediaURL('javascript:alert(1)','https://example.github.io/tanya23/'));
   assert.throws(()=>mediaURL('https://other.example/video.mp4','https://example.github.io/tanya23/'));
+});
+
+test('The dinner surprise appears at 16:00 Moscow and stays hidden before then, including direct links',()=>{
+  const content = JSON.parse(readFileSync(new URL('../content.json', import.meta.url), 'utf8'));
+  const visibleAt = time => visibleMoments(content, getContext('', Date.parse(time), content));
+  assert.equal(visibleAt('2026-11-13T15:59:59+03:00').some(moment => moment.id === 'dinner'), false);
+  const dinner = visibleAt('2026-11-13T16:00:00+03:00').find(moment => moment.id === 'dinner');
+  assert.ok(dinner);
+  assert.equal(dinner.invitation.startsAt, '2026-11-13T19:30:00+03:00');
+  assert.ok(Date.parse(dinner.opensAt) < Date.parse(dinner.invitation.startsAt));
+  const preview = getContext('?preview=all', Date.parse('2026-10-29T12:00:00+03:00'), content);
+  assert.ok(visibleMoments(content, preview).some(moment => moment.id === 'dinner'));
 });
