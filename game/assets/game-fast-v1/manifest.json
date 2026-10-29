@@ -1,0 +1,77 @@
+{
+  "title": "Game",
+  "bytes": 117419821,
+  "sha256": "7938c3f028252eedf58ec883b0b9d4f8dfcf7b9a19f34ddade1d98c916a5971d",
+  "parts": [
+    {
+      "url": "part-000.bin",
+      "bytes": 8388608,
+      "sha256": "5339e73787b31741dbc89c09b6dcb6a8c3420ac2041215d08a474583975f8328"
+    },
+    {
+      "url": "part-001.bin",
+      "bytes": 8388608,
+      "sha256": "da04fc1eb53dc6c8fad822ec810ffb2738f2b7ba469c77da79ea3bca105fa0a8"
+    },
+    {
+      "url": "part-002.bin",
+      "bytes": 8388608,
+      "sha256": "84c47b75e1bea58bab3acc17bf30ab2c95d4410fac4ee3b09ef1b3c5bd4aca5e"
+    },
+    {
+      "url": "part-003.bin",
+      "bytes": 8388608,
+      "sha256": "63e7736a83aad8414a8887b5b71d4aee352df7844d96de25d794b243588c231d"
+    },
+    {
+      "url": "part-004.bin",
+      "bytes": 8388608,
+      "sha256": "b050bb8f43b74a2c6b859357c027ef310166872b2728dbb44aee3bc7d5637a9a"
+    },
+    {
+      "url": "part-005.bin",
+      "bytes": 8388608,
+      "sha256": "9ad64c2e29efb5c23a79bd7bcd1587b0dc0c278b3f86b53d76bb18f5c1a2c18d"
+    },
+    {
+      "url": "part-006.bin",
+      "bytes": 8388608,
+      "sha256": "b6a9058c907578dbc0b966742035854d11dc9b022f99b569f3ea905aa05b0711"
+    },
+    {
+      "url": "part-007.bin",
+      "bytes": 8388608,
+      "sha256": "81e161d8f3c3e4eaf34889ca4109ef02e946b49a9d6a597ab14275414104598b"
+    },
+    {
+      "url": "part-008.bin",
+      "bytes": 8388608,
+      "sha256": "b6a0858e8e1875aa842c16eb5ff1837d5721a50d07ae69f8c7a69382100abfe2"
+    },
+    {
+      "url": "part-009.bin",
+      "bytes": 8388608,
+      "sha256": "e49ac979a5ad3da3b316d89aa7e963b9ce93043b8b001fe6a7583e4627fa9058"
+    },
+    {
+      "url": "part-010.bin",
+      "bytes": 8388608,
+      "sha256": "da7cb04147791113623f471b63aa6d703df7691e1a2dc7ad8104e9b6aa6913ba"
+    },
+    {
+      "url": "part-011.bin",
+      "bytes": 8388608,
+      "sha256": "b629d2c6ebbe06e937774a52a92bcc3258b4849633d9046e80d6f772c978e768"
+    },
+    {
+      "url": "part-012.bin",
+      "bytes": 8388608,
+      "sha256": "df235829616fb9585718b4a686315d6244cf0dd62126d93b5310cab7b8c41a76"
+    },
+    {
+      "url": "part-013.bin",
+      "bytes": 8367917,
+      "sha256": "b25fe25c4762f1bafc6150be546549e84edf878b3cc1f5f85f1e966c47f9b340"
+    }
+  ]
+}

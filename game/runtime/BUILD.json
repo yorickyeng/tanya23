@@ -1,0 +1,36 @@
+{
+  "upstream": "https://github.com/danoon2/Boxedwine",
+  "revision": "8790ff20428c22daa64368af9553417e4f499c94",
+  "sdk": "Emscripten 6.0.13",
+  "target": "jit",
+  "optimization": "-O3",
+  "audioQueueMs": 100,
+  "audioReserveMs": 70,
+  "audioPrimeMs": 70,
+  "arguments": [
+    "-skipFrameFPS",
+    "30",
+    "-audioFreq",
+    "22050"
+  ],
+  "sources": "source/boxedwine-8790ff2-pogonya.tar.gz",
+  "wineSource": "https://www.boxedwine.org/v/26R1/wine6/st/boxedwine.zip",
+  "gameExecutableSha256": "faca3548d4db8505d6a7c8e3063c580f4d613f40d752156b91768904ba5fee12",
+  "files": [
+    {
+      "file": "jit/boxedwine.js",
+      "bytes": 278777,
+      "sha256": "354a73a3ce1de91e225411304cbd64c5810a60830a03ef17c1c774b319993d00"
+    },
+    {
+      "file": "jit/boxedwine.wasm",
+      "bytes": 4331137,
+      "sha256": "d6cabe95858718605bf338b3d7d512f21b57c3a864336fb81c12988d4fdbc8b5"
+    },
+    {
+      "file": "source/boxedwine-8790ff2-pogonya.tar.gz",
+      "bytes": 23435573,
+      "sha256": "c9c1ef825cf866cfaeb1cd914d3bdf290ea6b1bcba38cd0b29be027853e7604b"
+    }
+  ]
+}

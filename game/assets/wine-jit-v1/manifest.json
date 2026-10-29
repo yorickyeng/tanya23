@@ -1,0 +1,32 @@
+{
+  "title": "Wine 6",
+  "bytes": 37247698,
+  "sha256": "55b26c04b46986c977d6ec18989623d983274e03a72d3dc2fb048fc74d1245f9",
+  "parts": [
+    {
+      "url": "part-000.bin",
+      "bytes": 8388608,
+      "sha256": "42027cf4ebcbdd476048ae0ac363dee2a7a72c347ddc8522b9a22dca7e26fc15"
+    },
+    {
+      "url": "part-001.bin",
+      "bytes": 8388608,
+      "sha256": "8fc7eb3da2c8c3cfde16d55c2c0b8e2374d369395fdb82deb8a77067378d92e9"
+    },
+    {
+      "url": "part-002.bin",
+      "bytes": 8388608,
+      "sha256": "117c06a13edea7777c8fc96965dffdeccdf28c66978a9875fb12b86489a1664f"
+    },
+    {
+      "url": "part-003.bin",
+      "bytes": 8388608,
+      "sha256": "2bff79dde19cd449aec6be9eaafb9541d7a41f44c3181bccff1d56a6c6ee2152"
+    },
+    {
+      "url": "part-004.bin",
+      "bytes": 3693266,
+      "sha256": "44949bce3920c87acd1c4acf83b67d055713beb80bd3a46368fec40b4a370133"
+    }
+  ]
+}

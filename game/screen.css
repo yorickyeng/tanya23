@@ -2,7 +2,7 @@
 [hidden]{display:none!important}
 html,body{margin:0;min-height:100%;width:100%;height:100%;overflow:hidden}
 body{display:grid;place-items:center;padding:24px;background:#f5eee7;color:#eee8df;font:14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-.stage{position:relative;isolation:isolate;width:min(1024px,100%,calc((100dvh - 48px)*4/3));aspect-ratio:4/3;overflow:hidden;border-radius:8px;background:#0b0e0d;box-shadow:0 20px 65px #513b3820,0 0 0 1px #513b3815}
+.stage{position:relative;isolation:isolate;width:min(800px,100%,calc((100dvh - 48px)*4/3));aspect-ratio:4/3;overflow:hidden;border-radius:8px;background:#0b0e0d;box-shadow:0 20px 65px #513b3820,0 0 0 1px #513b3815}
 canvas{display:block;width:100%;height:100%;outline:0;touch-action:none}
 .veil{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:#101715}
 .loading{pointer-events:none}
