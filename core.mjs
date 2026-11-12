@@ -39,3 +39,20 @@ export function mediaURL(source, base) {
   if (url.origin !== baseURL.origin) throw new Error('Media must be stored with the site');
   return url.href;
 }
+
+export function matchesDateAnswer(answer, acceptedDates) {
+  const value = String(answer).normalize('NFKC').trim().toLowerCase();
+  const iso = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  const numeric = value.match(/^(\d{1,2})[.\/\s-]+(\d{1,2})(?:[.\/\s-]+(\d{4}|\d{2}))?\.?$/);
+  const november = value.match(/^(\d{1,2})\s+ноябр[яь](?:\s+(\d{4})(?:\s+года?)?)?\.?$/);
+  let day, month, year;
+  if (iso) [, year, month, day] = iso;
+  else if (numeric) [, day, month, year] = numeric;
+  else if (november) { [, day, year] = november; month = '11'; }
+  else return false;
+  if (year?.length === 2) year = `20${year}`;
+  return acceptedDates.some(date => {
+    const [expectedYear, expectedMonth, expectedDay] = date.split('-').map(Number);
+    return Number(day) === expectedDay && Number(month) === expectedMonth && (!year || Number(year) === expectedYear);
+  });
+}

@@ -1,4 +1,4 @@
-import { getContext, visibleMoments, formatTime, clockTime, mediaURL } from './core.mjs';
+import { getContext, visibleMoments, formatTime, clockTime, mediaURL, matchesDateAnswer } from './core.mjs?v=7';
 
 const app = document.getElementById('app');
 const embedded = document.getElementById('site-content');
@@ -25,7 +25,7 @@ function route(id, search = location.search) {
   const params = new URLSearchParams(search);
   params.delete('id');
   if (id && config?.moments.some(moment => moment.id === id && moment.type === 'game')) {
-    params.set('v', '4');
+    params.set('v', '7');
     return `./game/${params.size ? '?' + params.toString() : ''}`;
   }
   if (id) params.set('id', id);
@@ -57,7 +57,9 @@ function modeLinks(context) {
   if (context.isReplay) {
     const label = el('label', 'replay-picker', 'Время в тот день: ');
     const select = el('select');
-    for (const time of ['00:00', '09:00', '13:00', '16:00', '20:00', '23:59']) {
+    const times = [...new Set(['00:00', ...config.moments.filter(moment => moment.published)
+      .map(moment => formatTime(moment.opensAt, config.timezone)), '23:59'])].sort();
+    for (const time of times) {
       const option = el('option', '', time);
       option.value = time;
       option.selected = pageParams.get('replay') === time;
@@ -84,9 +86,9 @@ function renderHome(context) {
   const fragment = document.createDocumentFragment();
   const banner = previewBanner(context);
   if (banner) fragment.append(banner);
-  fragment.append(el('h1', '', config.title));
+  fragment.append(el('h1', '', config.homeHeading || config.title));
   fragment.append(el('p', '', context.archive && !context.isReplay ?
-    '13 ноября 2026. Здесь осталось всё хорошее.' : 'Небольшая страница для Тани.'));
+    '13 ноября 2026. Здесь осталось всё хорошее.' : config.homeDescription || 'Небольшая страница для Тани.'));
   fragment.append(el('hr'));
   const heading = el('h2', '', context.archive && !context.isReplay ? 'На память' : 'Сегодня');
   fragment.append(heading);
@@ -137,7 +139,6 @@ function widgetShell(moment, context) {
   fragment.append(section);
   const body = el('section', `widget-body ${moment.type}-body`);
   fragment.append(body);
-  fragment.append(el('footer', 'widget-footer', 'Для тебя. Чтобы возвращаться.'));
   app.replaceChildren(fragment);
   app.setAttribute('aria-busy', 'false');
   return body;
@@ -176,11 +177,68 @@ function renderLetter(moment, context) {
   body.append(note);
 }
 
-function renderSong(moment, context) {
+function renderSongGate(moment, context, onUnlock) {
+  const body = widgetShell({...moment, eyebrow: 'Маленький секрет', heading: 'Сначала — один вопрос.',
+    description: 'Это точно знаешь только ты. Ну и я.'}, context);
+  const mode = context.isPreview ? `preview:${pageParams.get('preview')}` : context.isReplay ? 'replay' : 'live';
+  const storageKey = `tanya23:kiss:${moment.id}:${moment.opensAt}:v${moment.gate.version}:${mode}`;
+  try { if (localStorage.getItem(storageKey) === 'open') { onUnlock(); return; } } catch { /* Storage is optional. */ }
+  const card = el('form', 'kiss-card');
+  const heart = el('span', 'kiss-heart', '♡');
+  heart.setAttribute('aria-hidden', 'true');
+  const stepLabel = el('p', 'kiss-step', '01 / 02');
+  const heading = el('h2', '', 'Когда мы впервые поцеловались?');
+  heading.id = 'kiss-question';
+  const label = el('label', 'visually-hidden', 'Дата нашего первого поцелуя');
+  label.htmlFor = 'kiss-answer';
+  const input = el('input', 'kiss-input');
+  input.id = 'kiss-answer'; input.type = 'text'; input.autocomplete = 'off';
+  input.placeholder = 'дд.мм.гггг'; input.required = true;
+  input.setAttribute('aria-describedby', 'kiss-note');
+  const note = el('p', 'kiss-note', 'У этой ночи, кажется, было сразу две даты.');
+  note.id = 'kiss-note'; note.setAttribute('aria-live', 'polite');
+  const button = el('button', 'play-button', 'Проверить ♡');
+  button.type = 'submit';
+  card.setAttribute('aria-labelledby', heading.id);
+  card.append(heart, stepLabel, heading, label, input, note, button);
+  let step = 'date';
+  function shake() {
+    card.classList.remove('is-shaking');
+    void card.offsetWidth;
+    card.classList.add('is-shaking');
+  }
+  card.addEventListener('submit', event => {
+    event.preventDefault();
+    if (step === 'date') {
+      if (!matchesDateAnswer(input.value, moment.gate.acceptedDates)) {
+        note.textContent = 'Маленькая подсказка: это была ноябрьская ночь в 2025-м. Попробуешь ещё раз?';
+        input.setAttribute('aria-invalid', 'true'); shake(); input.focus(); return;
+      }
+      step = 'time'; stepLabel.textContent = '02 / 02'; heading.textContent = 'А время?';
+      label.textContent = 'А во сколько мы поцеловались?';
+      input.value = ''; input.placeholder = 'Хотя бы примерно…'; input.required = false;
+      input.removeAttribute('aria-invalid');
+      note.textContent = 'До секунды, пожалуйста. Я же всё записывал 😌';
+      button.textContent = 'Ну всё, открывай'; shake(); input.focus(); return;
+    }
+    // The time question is a joke: every answer, including an empty one, opens the song.
+    // The answer itself is neither stored nor sent anywhere.
+    try { localStorage.setItem(storageKey, 'open'); } catch { /* Keep working without storage. */ }
+    onUnlock(true);
+  });
+  body.append(card);
+}
+
+function renderSong(moment, context, unlocked = false, focus = false) {
+  if (moment.gate && !unlocked) {
+    renderSongGate(moment, context, shouldFocus => renderSong(moment, context, true, shouldFocus));
+    return;
+  }
   const body = widgetShell(moment, context);
   const player = el('div', 'record-player');
   const sleeve = el('div', 'record-sleeve');
   sleeve.append(el('span', 'sleeve-mark', '♡'));
+  sleeve.append(el('span', 'sleeve-title', moment.trackTitle));
   const record = el('button', 'vinyl');
   record.type = 'button';
   record.setAttribute('aria-label', 'Включить песню');
@@ -245,9 +303,13 @@ function renderSong(moment, context) {
   });
   audio.addEventListener('error', () => { status.textContent = 'Запись пока недоступна. Загляни сюда немного позже.'; });
   range.addEventListener('input', () => { if (Number.isFinite(audio.duration)) audio.currentTime = Number(range.value); });
-  info.append(playButton, rangeLabel, range, timeRow, status, audio);
+  const save = link('Сохранить песню себе ↓', source, 'song-download');
+  save.download = 'в квартире.mp3';
+  info.append(playButton, rangeLabel, range, timeRow, status, save, audio);
   player.append(info);
   body.append(player);
+  if (moment.personalNote) body.append(el('p', 'song-personal-note', moment.personalNote));
+  if (focus) { playButton.focus({preventScroll: true}); app.scrollIntoView({block: 'start'}); }
   if (moment.lyrics?.length) {
     const details = el('details', 'lyrics');
     details.append(el('summary', '', 'Слова песни'));
@@ -570,7 +632,7 @@ async function refreshContent() {
     const response = await fetch('./content.json', {cache: 'no-store'});
     if (!response.ok) throw new Error('Content unavailable');
     config = await response.json();
-    if (!momentID) render();
+    if (!momentID || document.body.classList.contains('home-page')) render();
   } catch { /* Keep the last successfully loaded content during a brief network interruption. */ }
 }
 
@@ -588,7 +650,12 @@ async function start() {
     else if (document.body.classList.contains('home-page')) render();
   }, 15000);
   if (!embedded) setInterval(refreshContent, 30000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshContent(); });
+  function resume() {
+    if (!momentID || document.body.classList.contains('home-page')) render();
+    refreshContent();
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) resume(); });
+  window.addEventListener('pageshow', resume);
   window.addEventListener('pagehide', () => activeAudio?.pause());
 }
 

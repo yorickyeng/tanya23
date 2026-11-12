@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 const root = process.cwd();
-for (const file of ['app.js','core.mjs','scripts/export.mjs','game/engine.js','game/bundle-loader.js','game/sha256.js','game/storage.js','game/isolation.js','game/coi-worker.js','game/buffered-audio.js']) execFileSync(process.execPath, ['--check', file], {stdio:'inherit'});
+for (const file of ['app.js','core.mjs','scripts/export.mjs','game/entry.js','game/engine.js','game/bundle-loader.js','game/sha256.js','game/storage.js','game/isolation.js','game/coi-worker.js','game/buffered-audio.js']) execFileSync(process.execPath, ['--check', file], {stdio:'inherit'});
 const config = JSON.parse(await readFile('content.json', 'utf8'));
 const ids = new Set();
 for (const moment of config.moments) {
@@ -12,6 +12,8 @@ for (const moment of config.moments) {
   if (!['letter','song','gallery','game','food','invitation'].includes(moment.type)) throw new Error(`Unknown widget: ${moment.type}`);
   if (!Number.isFinite(Date.parse(moment.opensAt))) throw new Error(`Invalid time: ${moment.id}`);
   if (moment.published && moment.type === 'song' && !moment.src) throw new Error('Add a song file before publishing the song widget');
+  if (moment.gate && (!Number.isInteger(moment.gate.version) || !moment.gate.acceptedDates?.length ||
+      moment.gate.acceptedDates.some(date => !/^\d{4}-\d{2}-\d{2}$/.test(date)))) throw new Error('Complete the kiss question dates');
   if (moment.published && moment.type === 'gallery' && !moment.items?.length) throw new Error('Add memories before publishing the gallery');
   if (moment.type === 'invitation') {
     const invite = moment.invitation;

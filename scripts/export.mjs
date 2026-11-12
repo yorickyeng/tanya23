@@ -15,5 +15,8 @@ html = html.replace('</body>', `<script id="site-content" type="application/json
 await writeFile(`${out}/index.html`, html);
 await cp('assets',`${out}/assets`,{recursive:true});
 await cp('game',`${out}/game`,{recursive:true});
+// The standalone home embeds these; the game entry uses relative module/data URLs.
+await cp('content.json',`${out}/content.json`);
+await cp('core.mjs',`${out}/core.mjs`);
 await writeFile(`${out}/READ-ME.txt`, 'Откройте index.html в браузере. Для просмотра всех блоков добавьте ?preview=all к адресу. Материалы находятся рядом в папке assets. Для игрового окна нужен HTTP-сервер: python3 -m http.server 4173 --bind 127.0.0.1, затем http://127.0.0.1:4173/?preview=all.\n');
 console.log(`Autonomous copy: ${out}/index.html`);

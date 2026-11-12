@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import {getContext,visibleMoments,clockTime,mediaURL} from '../core.mjs';
+import {getContext,visibleMoments,clockTime,mediaURL,matchesDateAnswer} from '../core.mjs';
 const config = {birthday:'2026-11-13',archiveAt:'2026-11-14T00:00:00+03:00',moments:[
   {id:'midnight',published:true,opensAt:'2026-11-13T00:00:00+03:00'},
   {id:'song',published:true,opensAt:'2026-11-13T16:00:00+03:00'},
@@ -54,4 +54,35 @@ test('The dinner surprise appears at 16:00 Moscow and stays hidden before then, 
   assert.ok(Date.parse(dinner.opensAt) < Date.parse(dinner.invitation.startsAt));
   const preview = getContext('?preview=all', Date.parse('2026-10-29T12:00:00+03:00'), content);
   assert.ok(visibleMoments(content, preview).some(moment => moment.id === 'dinner'));
+});
+
+test('The release reveals four surprises in order, at Moscow boundaries, and keeps them as an archive',()=>{
+  const content = JSON.parse(readFileSync(new URL('../content.json', import.meta.url), 'utf8'));
+  const expected = [
+    ['2026-11-13T07:59:59+03:00', []],
+    ['2026-11-13T05:00:00Z', ['food']],
+    ['2026-11-13T12:59:59+03:00', ['food']],
+    ['2026-11-13T10:00:00Z', ['food','surprise']],
+    ['2026-11-13T15:59:59+03:00', ['food','surprise']],
+    ['2026-11-13T13:00:00Z', ['food','surprise','dinner']],
+    ['2026-11-13T19:29:59+03:00', ['food','surprise','dinner']],
+    ['2026-11-13T16:30:00Z', ['food','surprise','dinner','song']],
+    ['2027-01-01T00:00:00Z', ['food','surprise','dinner','song']]
+  ];
+  for (const [time, ids] of expected) {
+    assert.deepEqual(visibleMoments(content, getContext('', Date.parse(time), content)).map(moment => moment.id), ids, time);
+  }
+  const replay = getContext('?replay=19%3A30', Date.parse('2027-01-01T00:00:00Z'), content);
+  assert.deepEqual(visibleMoments(content, replay).map(moment => moment.id), ['food','surprise','dinner','song']);
+  assert.equal(content.moments.some(moment => ['letter','memories'].includes(moment.id)), false);
+});
+
+test('The midnight kiss accepts either side of the date boundary, familiar date formats and an omitted year',()=>{
+  const dates = ['2025-11-13','2025-11-14'];
+  for (const answer of ['13.11.2025','14.11.2025','13/11/25','14.11','2025-11-14','13 ноября 2025','14 ноября']) {
+    assert.equal(matchesDateAnswer(answer, dates), true, answer);
+  }
+  for (const answer of ['13.11.2026','12.11.2025','14.12.2025','23:00','','banana','31.11.2025']) {
+    assert.equal(matchesDateAnswer(answer, dates), false, answer);
+  }
 });
