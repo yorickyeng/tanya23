@@ -2,8 +2,9 @@ import { readFile, stat } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
+import { gunzipSync } from 'node:zlib';
 const root = process.cwd();
-for (const file of ['app.js','core.mjs','scripts/export.mjs','game/entry.js','game/engine.js','game/bundle-loader.js','game/sha256.js','game/storage.js','game/isolation.js','game/coi-worker.js','game/buffered-audio.js']) execFileSync(process.execPath, ['--check', file], {stdio:'inherit'});
+for (const file of ['app.js','core.mjs','scripts/export.mjs','game/entry.js','game/engine.js','game/controls.js','game/startup.js','game/bundle-loader.js','game/sha256.js','game/storage.js','game/isolation.js','game/coi-worker.js','game/buffered-audio.js']) execFileSync(process.execPath, ['--check', file], {stdio:'inherit'});
 const config = JSON.parse(await readFile('content.json', 'utf8'));
 const ids = new Set();
 for (const moment of config.moments) {
@@ -44,7 +45,7 @@ JSON.parse(await readFile('manifest.webmanifest','utf8'));
 for (const file of ['index.html','moment.html','styles.css','.nojekyll','assets/icon.svg']) await stat(file);
 for (const file of ['game/index.html','game/screen.css','game/runtime/boxedwine.js','game/runtime/boxedwine.wasm',
   'game/runtime/browserfs.boxedwine.js','game/assets/codec/ir50_32.dll']) await stat(file);
-for (const archive of ['wine','game','wine-jit-v1','game-fast-v1']) {
+for (const archive of ['wine','game','wine-jit-v1','game-fast-v1','first-v3/wine','first-v3/game']) {
   const base = path.resolve(root,'game','assets',archive);
   const manifest = JSON.parse(await readFile(path.join(base,'manifest.json'),'utf8'));
   if (manifest.parts.reduce((sum,part) => sum + part.bytes,0) !== manifest.bytes) throw new Error(`Invalid archive size: ${archive}`);
@@ -59,6 +60,34 @@ for (const archive of ['wine','game','wine-jit-v1','game-fast-v1']) {
   }
   if (archiveHash.digest('hex') !== manifest.sha256) throw new Error(`Changed archive: ${archive}`);
 }
+const firstBase = path.resolve(root,'game/assets/first-v3');
+const first = JSON.parse(await readFile(path.join(firstBase,'manifest.json'),'utf8'));
+const music = JSON.parse(await readFile(path.join(firstBase,'audio/manifest.json'),'utf8'));
+const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+async function checkedAsset(directory, record) {
+  const file = path.resolve(directory, record.file);
+  if (!file.startsWith(directory + path.sep)) throw new Error('Startup asset escapes its folder');
+  const bytes = await readFile(file);
+  if (bytes.length !== record.bytes || hash(bytes) !== record.sha256) throw new Error(`Changed startup asset: ${file}`);
+  return bytes;
+}
+const wasm = gunzipSync(await checkedAsset(firstBase,first.runtime));
+if (wasm.length !== first.runtime.rawBytes || hash(wasm) !== first.runtime.rawSha256 ||
+    hash(await readFile('game/runtime/jit/boxedwine.wasm')) !== first.runtime.rawSha256) throw new Error('Compressed runtime differs from native runtime');
+const effects = gunzipSync(await checkedAsset(path.join(firstBase,'audio'),music.base));
+if (effects.length !== music.base.rawBytes || hash(effects) !== music.base.rawSha256) throw new Error('Changed original sound effects');
+const musicIDs = music.tracks.flatMap(track => track.ids).sort((a,b) => a-b);
+if (JSON.stringify(musicIDs) !== JSON.stringify(Array.from({length:10},(_,i) => 50+i))) throw new Error('Missing original music tracks');
+let audioBytes = music.base.bytes;
+for (const track of music.tracks) {
+  await checkedAsset(path.join(firstBase,'audio'),track); audioBytes += track.bytes;
+  if (track.offset < effects.length || track.offset + track.pcmBytes > music.bankBytes || track.pcmBytes % 4) throw new Error('Invalid original music range');
+}
+for (const name of ['wine','game']) {
+  const bundle = JSON.parse(await readFile(path.join(firstBase,name,'manifest.json'),'utf8'));
+  if (bundle.bytes !== first[name+'Bytes']) throw new Error('Startup bundle size mismatch');
+}
+if (audioBytes !== first.audioBytes || first.downloadBytes !== first.wineBytes + first.gameBytes + audioBytes + first.runtime.bytes) throw new Error('Invalid first-download total');
 const runtime = JSON.parse(await readFile('game/runtime/BUILD.json','utf8'));
 for (const part of runtime.files) {
   const bytes = await readFile(path.resolve(root,'game/runtime',part.file));

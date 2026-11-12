@@ -25,7 +25,7 @@ function route(id, search = location.search) {
   const params = new URLSearchParams(search);
   params.delete('id');
   if (id && config?.moments.some(moment => moment.id === id && moment.type === 'game')) {
-    params.set('v', '7');
+    params.set('v', '8');
     return `./game/${params.size ? '?' + params.toString() : ''}`;
   }
   if (id) params.set('id', id);

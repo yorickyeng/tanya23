@@ -1,8 +1,9 @@
 /** Read the previous BrowserFS save store without changing or deleting it. */
 export async function loadLegacySaves(){
   try{
-    if(!window.indexedDB?.databases||!window.BrowserFS)return [];
+    if(!window.indexedDB?.databases)return [];
     if(!(await indexedDB.databases()).some(db=>db.name==='tanya23-game-v1'))return [];
+    if(!window.BrowserFS)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=new URL('./runtime/browserfs.boxedwine.js',import.meta.url);script.onload=resolve;script.onerror=reject;document.head.append(script);});
     const create=(type,options)=>new Promise((resolve,reject)=>BrowserFS.FileSystem[type].Create(options,(error,fs)=>error?reject(error):resolve(fs)));
     const database=await create('IndexedDB',{storeName:'tanya23-game-v1'});
     const mirror=await create('AsyncMirror',{sync:new BrowserFS.FileSystem.InMemory(),async:database});
@@ -19,7 +20,8 @@ export async function loadLegacySaves(){
   }catch{return [];}
 }
 /** Use the runtime's native ZIP reader and persistent write overlay, avoiding BrowserFS in gameplay. */
-export function prepareStorage(legacy,log){
+export function prepareStorage(legacy,log,sounds){
+  if(sounds){FS.mkdirTree('/runtime-audio');FS.writeFile('/runtime-audio/SOUNDS.RES',sounds,{canOwn:true});}
   FS.mkdirTree('/state');
   const boot=()=>{
     const c='/state/home/username/.wine/drive_c/';FS.mkdirTree(c+'game');
@@ -30,6 +32,10 @@ export function prepareStorage(legacy,log){
         if(!FS.analyzePath(path).exists){FS.mkdirTree(path.slice(0,path.lastIndexOf('/')));FS.writeFile(path,file.data);}
       }
       FS.writeFile(marker,'1');
+    }
+    if(sounds){
+      try{FS.unlink(c+'game/SOUNDS.RES');}catch{}
+      FS.writeFile(c+'game/SOUNDS.RES.link','/mnt/audio/SOUNDS.RES');
     }
     FS.writeFile(c+'start.cmd','@echo off\r\nC:\r\ncd \\game\r\nNP.EXE\r\n');
   };

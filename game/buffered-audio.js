@@ -35,7 +35,7 @@ export function installBufferedAudio(audio,getHeap,module,{force=false,Audio=glo
   audio.queue=(id,pointer,frames)=>{
     const device=audio.devices.get(id);if(!device||device.closing||audio.failed)return 0;
     if(frames>device.capacity-queued(device)){device.queueFailures++;return 0;}
-    if(!frames)return 1;
+    if(!frames)return 0;
     try{
       // Read the current heap each time: JIT memory may grow between packets.
       const heap=getHeap(),view=new DataView(heap.buffer,heap.byteOffset+pointer,frames*device.channels*4);
@@ -53,7 +53,7 @@ export function installBufferedAudio(audio,getHeap,module,{force=false,Audio=glo
       const source=audio.context.createBufferSource();source.buffer=buffer;source.connect(audio.context.destination);
       device.nodes.add(source);source.onended=()=>{device.nodes.delete(source);source.disconnect();};
       source.start(start);device.segments.push({start,frames});device.nextTime=start+frames/device.rate;device.written+=frames;
-      device.maxQueued=Math.max(device.maxQueued,queued(device));return 1;
+      device.maxQueued=Math.max(device.maxQueued,queued(device));return frames;
     }catch{audio.failed=true;return 0;}
   };
   audio.close=(id,drain)=>{const device=audio.devices.get(id);if(device){device.closing=true;if(!drain||!queued(device))dispose(device);}};

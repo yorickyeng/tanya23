@@ -1,7 +1,8 @@
-import {loadBundle} from './bundle-loader.js?v=3';
-import {enableIsolation} from './isolation.js?v=3';
-import {installBufferedAudio} from './buffered-audio.js?v=4';
-import {loadLegacySaves,prepareStorage} from './storage.js?v=3';
+import {setupControls} from './controls.js?v=5';
+import {loadStartup} from './startup.js?v=5';
+import {enableIsolation} from './isolation.js?v=5';
+import {installBufferedAudio} from './buffered-audio.js?v=5';
+import {loadLegacySaves,prepareStorage} from './storage.js?v=5';
 
 const stage=document.querySelector('#stage');
 const canvas=document.querySelector('#canvas');
@@ -14,7 +15,7 @@ const logs=[];
 const keys=new Map();
 const watchedAudio=new WeakSet();
 let phase='loading',paused=false,dirtyLog=false,guestAudioActivated=false;
-let frames=0,mips=0;
+let frames=0,mips=0,startupReadyMs=0,startupAssetBytes=0;
 const diagnostics=new URLSearchParams(location.search).has('diagnostics');
 new MutationObserver(()=>{
   const sample=/BoxedWine (\d+) MIPS/.exec(document.title);
@@ -74,7 +75,7 @@ gate.addEventListener('click',()=>{
 stage.addEventListener('pointerdown',event=>{if(event.target!==gate&&!gate.contains(event.target))activate();});
 // Run before the runtime's window-level input capture. Host buttons must receive
 // their own clicks, and held keys must be released before pausing the emulator.
-const hostControl=event=>event.target instanceof Element&&Boolean(event.target.closest('button,.veil'));
+const hostControl=event=>event.target instanceof Element&&Boolean(event.target.closest('button,a,[data-ui],.veil'));
 window.addEventListener('keydown',event=>{
   if(hostControl(event)){event.stopImmediatePropagation();return;}
   keys.set(event.code,{key:event.key,keyCode:event.keyCode});activate();
@@ -107,7 +108,7 @@ function present(width,height,buffer,presentState){
     if(canvas.width!==width)canvas.width=width;if(canvas.height!==height)canvas.height=height;
     context ||= canvas.getContext('2d',{alpha:false});
     context.putImageData(new ImageData(new Uint8ClampedArray(buffer),width,height),0,0);frames++;
-    if(phase==='starting'){setPhase('running');loading.hidden=true;syncGate();if(document.hidden)pause();}
+    if(phase==='starting'){startupReadyMs=performance.now();setPhase('running');loading.hidden=true;syncGate();if(document.hidden)pause();}
   }finally{if(presentState)Atomics.store(presentState,0,0);}
 }
 if(diagnostics){
@@ -115,31 +116,31 @@ if(diagnostics){
   let start=performance.now();
   setInterval(()=>{
     const now=performance.now();node.textContent=JSON.stringify({fps:frames*1000/(now-start),mips,state:stage.dataset.state,
-      isolated:window.crossOriginIsolated,audio:window.Module?.boxedwineAudio?.snapshot()});
+      isolated:window.crossOriginIsolated,startupReadyMs,startupAssetBytes,audio:window.Module?.boxedwineAudio?.snapshot()});
     frames=0;start=now;
   },2000);
 }
 async function main(){
   if(location.protocol==='file:')throw new Error('Use the website or a local HTTP server');
   await enableIsolation();
-  const amounts={root:0,game:0};
-  const update=(part,weight)=>(received,total)=>{amounts[part]=weight*received/total;progress.value=amounts.root+amounts.game;};
-  const [root,game,legacy]=await Promise.all([
-    loadBundle('./assets/wine-jit-v1/manifest.json',{onProgress:update('root',22)}),
-    loadBundle('./assets/game-fast-v1/manifest.json',{onProgress:update('game',71)}),
+  const [assets,legacy]=await Promise.all([
+    loadStartup({onProgress:(done,total)=>{progress.value=94*done/total;document.querySelector('#load-detail').textContent=`Подготовка… ${Math.round(94*done/total)}%`;}}),
     loadLegacySaves()
   ]);
+  const {root,game,sounds,wasm}=assets;startupAssetBytes=assets.downloadBytes;
+  document.querySelector('#load-detail').textContent='Запускаем…';
   progress.value=97;setPhase('starting');
   window.Module={
     arguments:['-root','/state','-zip','/wine.zip','-mount','/game.zip','/home/username/.wine/drive_c/game',
-      '-bpp','16','-skipFrameFPS','30','-audioFreq','22050','-env','WINEDEBUG=-all',
-      '-w','/home/username/.wine/drive_c/game','/bin/wine','cmd','/c','C:\\start.cmd'],
+      '-mount','/runtime-audio','/mnt/audio','-bpp','16','-skipFrameFPS','30','-audioFreq','22050','-env','WINEDEBUG=-all',
+      '-w','/home/username/.wine/drive_c/game','/bin/wine','/home/username/.wine/drive_c/game/NP.EXE'],
     canvas,boxedwinePresentSoftwareFrame:present,boxedwineAudioPrimeMs:70,
     locateFile:path=>new URL('./runtime/jit/'+path+'?v=4',location.href).href,
+    instantiateWasm:(imports,receive)=>{WebAssembly.instantiate(wasm,imports).then(instance=>receive(instance)).catch(fail);return {};},
     preRun:[()=>{
       installBufferedAudio(window.BoxedwineAudio,()=>HEAPU8,window.Module,{force:new URLSearchParams(location.search).get('audioBackend')==='buffer'});
       FS.writeFile('/wine.zip',root.data,{canOwn:true});FS.writeFile('/game.zip',game.data,{canOwn:true});
-      root.data=null;game.data=null;prepareStorage(legacy,log);
+      root.data=null;game.data=null;prepareStorage(legacy,log,sounds);
     }],
     print:log,printErr:log,setStatus:text=>{if(text)log(text);},
     onAbort:reason=>fail(new Error(String(reason))),
@@ -148,4 +149,5 @@ async function main(){
   const script=document.createElement('script');script.src='./runtime/jit/boxedwine.js?v=4';
   script.onerror=()=>fail(new Error('Runtime unavailable'));document.body.append(script);
 }
+setupControls({onHome:pause});
 main().catch(fail);

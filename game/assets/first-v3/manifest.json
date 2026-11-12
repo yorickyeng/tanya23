@@ -1,0 +1,14 @@
+{
+  "version": 3,
+  "wineBytes": 23444156,
+  "gameBytes": 26010543,
+  "audioBytes": 7148859,
+  "runtime": {
+    "file": "runtime.wasm.gz",
+    "bytes": 1176140,
+    "sha256": "07ff1b911c8f6e7c42ce67cf7366c30cc4ce5b85545ef3e427cbbbfea1b00cc5",
+    "rawBytes": 4331137,
+    "rawSha256": "d6cabe95858718605bf338b3d7d512f21b57c3a864336fb81c12988d4fdbc8b5"
+  },
+  "downloadBytes": 57779698
+}

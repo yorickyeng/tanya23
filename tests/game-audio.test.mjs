@@ -16,7 +16,9 @@ function fixture(){
 }
 test('scheduled packets preserve stereo order and form a continuous native timeline',()=>{
  const {output,write}=fixture(),id=output.open(2,22050,2205);write([.25,-.5,.75,-1]);
- assert.equal(output.queue(id,0,2),1);assert.equal(output.queue(id,0,2),1);
+ // The native bw_audio_queue ABI requires the number of accepted frames.
+ assert.equal(output.queue(id,0,0),0);
+ assert.equal(output.queue(id,0,2),2);assert.equal(output.queue(id,0,2),2);
  const [a,b]=output.context.sources;assert.deepEqual([...a.buffer.data[0]],[.25,.75]);assert.deepEqual([...a.buffer.data[1]],[-.5,-1]);
  assert.equal(a.time,.07);assert.equal(b.time,a.time+2/22050);assert.equal(output.queued(output.devices.get(id)),4);
 });

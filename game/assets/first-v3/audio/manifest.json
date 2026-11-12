@@ -1,0 +1,115 @@
+{
+  "sampleRate": 22050,
+  "channels": 2,
+  "bankBytes": 97570382,
+  "tableBytes": 16000,
+  "base": {
+    "file": "effects.gz",
+    "bytes": 527395,
+    "sha256": "00cf5e0408aa5e7d47f305243d597848b519567868d03cec1647bb1caf088570",
+    "rawBytes": 713882,
+    "rawSha256": "0165892064546496592b3099268190de74813108c24a4cbb87c04311eec0fa91"
+  },
+  "tracks": [
+    {
+      "file": "music-50.m4a",
+      "offset": 713882,
+      "pcmBytes": 11514892,
+      "frames": 2878723,
+      "ids": [
+        50,
+        55
+      ],
+      "bytes": 786838,
+      "sha256": "6591bee811f6fa1f0943d38529716b3b08c407cbcd929c77998c6aab714cab35"
+    },
+    {
+      "file": "music-51.m4a",
+      "offset": 12228774,
+      "pcmBytes": 10937496,
+      "frames": 2734374,
+      "ids": [
+        51
+      ],
+      "bytes": 748936,
+      "sha256": "b1f6d19f34b74ede63a230bc99c344b39aabd722aca8a5a83b210c31dbe81c74"
+    },
+    {
+      "file": "music-52.m4a",
+      "offset": 23166270,
+      "pcmBytes": 11995680,
+      "frames": 2998920,
+      "ids": [
+        52
+      ],
+      "bytes": 819590,
+      "sha256": "592b907be6d4fa98d69a47149daf7dfd4fa2976bf8fb2ce1b1e64bb8b3f6e51e"
+    },
+    {
+      "file": "music-53.m4a",
+      "offset": 35161950,
+      "pcmBytes": 11008252,
+      "frames": 2752063,
+      "ids": [
+        53
+      ],
+      "bytes": 753207,
+      "sha256": "1fd44dec60d517f901ccf49848445f3620bf7b7437a377d7d7a08ee81518edab"
+    },
+    {
+      "file": "music-54.m4a",
+      "offset": 46170202,
+      "pcmBytes": 11006940,
+      "frames": 2751735,
+      "ids": [
+        54
+      ],
+      "bytes": 753093,
+      "sha256": "e022b671da3a6e23cd4380c3389eec6401a46cdd7ab75b1a7a4411cff904274d"
+    },
+    {
+      "file": "music-56.m4a",
+      "offset": 57177142,
+      "pcmBytes": 10583916,
+      "frames": 2645979,
+      "ids": [
+        56
+      ],
+      "bytes": 725061,
+      "sha256": "0526552c281fdb7006549c98b72f5caa81e79115906790bb623f9c32e3155bb6"
+    },
+    {
+      "file": "music-57.m4a",
+      "offset": 67761058,
+      "pcmBytes": 11207836,
+      "frames": 2801959,
+      "ids": [
+        57
+      ],
+      "bytes": 764667,
+      "sha256": "2df0afa0ff4f5bdc6e579cda3f1d5d0233d436fe2cede7f24dc9ff122ac6841f"
+    },
+    {
+      "file": "music-58.m4a",
+      "offset": 78968894,
+      "pcmBytes": 8643212,
+      "frames": 2160803,
+      "ids": [
+        58
+      ],
+      "bytes": 590759,
+      "sha256": "351e0b16f226b1255761fdcb60433cd96f8d252644bf899745b07b3a3d9d5b52"
+    },
+    {
+      "file": "music-59.m4a",
+      "offset": 87612106,
+      "pcmBytes": 9958276,
+      "frames": 2489569,
+      "ids": [
+        59
+      ],
+      "bytes": 679313,
+      "sha256": "42328528fb3ad4a6048f6bedc0b7c3b0c08a1f06e36f059e08afdfa6a80ef304"
+    }
+  ]
+}
