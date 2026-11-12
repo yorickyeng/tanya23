@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { gunzipSync } from 'node:zlib';
 const root = process.cwd();
-for (const file of ['app.js','core.mjs','scripts/export.mjs','game/entry.js','game/engine.js','game/controls.js','game/startup.js','game/bundle-loader.js','game/sha256.js','game/storage.js','game/isolation.js','game/coi-worker.js','game/buffered-audio.js']) execFileSync(process.execPath, ['--check', file], {stdio:'inherit'});
+for (const file of ['app.js','core.mjs','scripts/export.mjs','game/entry.js','game/engine.js','game/controls.js','game/startup.js','game/download.js','game/bundle-loader.js','game/sha256.js','game/storage.js','game/isolation.js','game/coi-worker.js','game/buffered-audio.js']) execFileSync(process.execPath, ['--check', file], {stdio:'inherit'});
 const config = JSON.parse(await readFile('content.json', 'utf8'));
 const ids = new Set();
 for (const moment of config.moments) {

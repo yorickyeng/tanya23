@@ -1,3 +1,4 @@
+import {downloadBytes} from './download.js?v=7';
 /** Load a versioned archive from small static files; verify every part. */
 export async function loadBundle(manifestUrl, {onProgress = () => {}, signal} = {}) {
   const url = new URL(manifestUrl, location.href);
@@ -12,7 +13,8 @@ export async function loadBundle(manifestUrl, {onProgress = () => {}, signal} = 
   const data = new Uint8Array(manifest.bytes);
   const offsets = []; let offset = 0;
   for (const part of manifest.parts) { offsets.push(offset); offset += part.bytes; }
-  let next = 0, received = 0;
+  let next = 0;
+  const progress = manifest.parts.map(() => 0);
   onProgress(0, manifest.bytes, manifest.title);
   async function worker() {
     for (;;) {
@@ -22,9 +24,10 @@ export async function loadBundle(manifestUrl, {onProgress = () => {}, signal} = 
       // Package URLs are relative to the manifest, keeping subfolder embeds portable.
       const partUrl = new URL(part.url, url);
       if (partUrl.origin !== url.origin) throw new Error('Файл игры находится на другом сайте.');
-      const result = await fetch(partUrl, {signal});
-      if (!result.ok) throw new Error(`Файл игры недоступен (${result.status}): ${part.url}`);
-      const bytes = new Uint8Array(await result.arrayBuffer());
+      const bytes = await downloadBytes(partUrl, part.bytes, {signal,onProgress:count => {
+        progress[index] = count;
+        onProgress(progress.reduce((sum,n) => sum+n,0),manifest.bytes,manifest.title);
+      }});
       if (bytes.length !== part.bytes) throw new Error(`Файл загружен не полностью: ${part.url}`);
       // WebCrypto is unavailable on an HTTP custom domain. Keep the same
       // integrity check there using a local, portable SHA-256 implementation.
@@ -37,8 +40,7 @@ export async function loadBundle(manifestUrl, {onProgress = () => {}, signal} = 
       const hash = Array.from(digest, b => b.toString(16).padStart(2, '0')).join('');
       if (hash !== part.sha256) throw new Error(`Проверка файла не пройдена: ${part.url}. Обнови страницу.`);
       data.set(bytes, offsets[index]);
-      received += bytes.length;
-      onProgress(received, manifest.bytes, manifest.title);
+
     }
   }
   await Promise.all(Array.from({length: Math.min(3, manifest.parts.length)}, worker));

@@ -1,4 +1,5 @@
-import {loadBundle} from './bundle-loader.js?v=5';
+import {downloadBytes} from './download.js?v=7';
+import {loadBundle} from './bundle-loader.js?v=7';
 
 async function digest(bytes){
   const value=globalThis.crypto?.subtle?new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)):(await import('./sha256.js')).sha256(bytes);
@@ -7,8 +8,7 @@ async function digest(bytes){
 export async function fetchChecked(url,record){
   const target=new URL(url,location.href);
   if(target.origin!==location.origin)throw new Error('Unexpected asset origin');
-  const response=await fetch(target);if(!response.ok)throw new Error(`Asset unavailable: ${response.status}`);
-  const bytes=new Uint8Array(await response.arrayBuffer());
+  const bytes=await downloadBytes(target,record.bytes);
   if(bytes.length!==record.bytes||await digest(bytes)!==record.sha256)throw new Error('Asset integrity check failed');
   return bytes;
 }

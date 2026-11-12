@@ -1,5 +1,5 @@
 import {setupControls} from './controls.js?v=6';
-import {loadStartup} from './startup.js?v=5';
+import {loadStartup} from './startup.js?v=7';
 import {enableIsolation} from './isolation.js?v=5';
 import {installBufferedAudio} from './buffered-audio.js?v=5';
 import {loadLegacySaves,prepareStorage} from './storage.js?v=5';

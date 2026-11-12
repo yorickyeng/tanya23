@@ -45,7 +45,7 @@ async function checkSchedule() {
     preload.rel = 'preload'; preload.as = 'script'; preload.href = './runtime/jit/boxedwine.js?v=4';
     document.head.append(preload);
     document.querySelector('#fullscreen').disabled = false;
-    await import('./engine.js?v=6');
+    await import('./engine.js?v=7');
   } catch {
     showWaiting('Не получилось загрузить страницу. Попробуй обновить её.');
   } finally { checking = false; }
