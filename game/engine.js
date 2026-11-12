@@ -1,4 +1,4 @@
-import {setupControls} from './controls.js?v=5';
+import {setupControls} from './controls.js?v=6';
 import {loadStartup} from './startup.js?v=5';
 import {enableIsolation} from './isolation.js?v=5';
 import {installBufferedAudio} from './buffered-audio.js?v=5';
@@ -149,5 +149,5 @@ async function main(){
   const script=document.createElement('script');script.src='./runtime/jit/boxedwine.js?v=4';
   script.onerror=()=>fail(new Error('Runtime unavailable'));document.body.append(script);
 }
-setupControls({onHome:pause});
+setupControls({onHome:pause,onFullscreen:releaseKeys});
 main().catch(fail);

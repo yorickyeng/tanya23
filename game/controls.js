@@ -1,5 +1,5 @@
 /** Fullscreen changes presentation only: the guest canvas remains 800 × 600. */
-export function setupControls({onHome=()=>{}}={}){
+export function setupControls({onHome=()=>{},onFullscreen=()=>{}}={}){
   const player=document.querySelector('#player'),home=document.querySelector('#home'),button=document.querySelector('#fullscreen');
   const status=document.querySelector('#player-status'),stage=document.querySelector('#stage');
   const destination=new URL('../index.html',location.href),params=new URLSearchParams(location.search);
@@ -15,6 +15,7 @@ export function setupControls({onHome=()=>{}}={}){
     button.setAttribute('aria-label',label);button.title=label;button.querySelector('span').textContent=label;
   };
   button.addEventListener('click',async()=>{
+    onFullscreen();
     try{
       if(nativeActive())await (document.exitFullscreen||document.webkitExitFullscreen).call(document);
       else if(expanded)expanded=false;
@@ -22,6 +23,7 @@ export function setupControls({onHome=()=>{}}={}){
       else expanded=true;
       update();
     }catch{expanded=true;update();document.querySelector('#fullscreen-message').textContent='Игровое окно развёрнуто внутри страницы.';}
+    finally{stage.querySelector('canvas').focus();}
   });
   window.addEventListener('keydown',event=>{if(event.key==='Escape'&&expanded){expanded=false;update();event.preventDefault();event.stopImmediatePropagation();}},true);
   document.addEventListener('fullscreenchange',update);document.addEventListener('webkitfullscreenchange',update);
