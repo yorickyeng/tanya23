@@ -321,3 +321,7 @@ video.memory-image { object-fit:contain; }
   .dinner-details { padding:27px;border-left:0;border-top:1px dashed #d6c5a9; }
 }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important;transition:none!important;scroll-behavior:auto!important; } }
+
+.home-page footer time { display:block;margin-top:4px; }
+.theme-song .widget-intro .eyebrow { text-transform:none;letter-spacing:.02em;font-size:14px;font-weight:normal; }
+.player-status:empty { display:none; }

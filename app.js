@@ -87,8 +87,8 @@ function renderHome(context) {
   const banner = previewBanner(context);
   if (banner) fragment.append(banner);
   fragment.append(el('h1', '', config.homeHeading || config.title));
-  fragment.append(el('p', '', context.archive && !context.isReplay ?
-    '13 ноября 2026. Здесь осталось всё хорошее.' : config.homeDescription || 'Небольшая страница для Тани.'));
+  const description = context.archive && !context.isReplay ? '13 ноября 2026. Здесь осталось всё хорошее.' : config.homeDescription;
+  if (description) fragment.append(el('p', '', description));
   fragment.append(el('hr'));
   const heading = el('h2', '', context.archive && !context.isReplay ? 'На память' : 'Сегодня');
   fragment.append(heading);
@@ -110,8 +110,10 @@ function renderHome(context) {
   const modes = modeLinks(context);
   if (modes) fragment.append(modes);
   fragment.append(el('hr'));
-  const footer = el('footer', '', 'С любовью. ');
-  footer.append(el('span', 'tiny-heart', '♡'));
+  const footer = el('footer', '', 'С любовью ');
+  const birthdayDate = el('time', '', '13.11.2026');
+  birthdayDate.dateTime = config.birthday;
+  footer.append(el('span', 'tiny-heart', '♡'), birthdayDate);
   fragment.append(footer);
   const live = el('p', 'visually-hidden');
   live.id = 'announcement';
@@ -238,19 +240,15 @@ function renderSong(moment, context, unlocked = false, focus = false) {
   const player = el('div', 'record-player');
   const sleeve = el('div', 'record-sleeve');
   sleeve.append(el('span', 'sleeve-mark', '♡'));
-  sleeve.append(el('span', 'sleeve-title', moment.trackTitle));
   const record = el('button', 'vinyl');
   record.type = 'button';
   record.setAttribute('aria-label', 'Включить песню');
   const recordLabel = el('span', 'record-label');
-  recordLabel.append(el('span', '', 'сторона А'), el('strong', '', moment.trackTitle), el('i', 'record-hole'));
+  recordLabel.append(el('i', 'record-hole'));
   record.append(recordLabel);
   sleeve.append(record);
   player.append(sleeve);
   const info = el('div', 'track-info');
-  info.append(el('p', 'track-kicker', 'ЗАПИСАНО ДЛЯ ТЕБЯ'));
-  info.append(el('h2', '', moment.trackTitle));
-  info.append(el('p', 'artist', moment.artist));
   const audio = el('audio');
   audio.preload = 'metadata';
   activeAudio = audio;
@@ -271,12 +269,12 @@ function renderSong(moment, context, unlocked = false, focus = false) {
   const elapsed = el('span', '', '0:00');
   const total = el('span', '', '—:—');
   timeRow.append(elapsed, total);
-  const status = el('p', 'player-status', source ? 'Лучше слушать в наушниках.' : 'Эта маленькая сцена ждёт свою песню.');
+  const status = el('p', 'player-status');
   status.setAttribute('role', 'status');
   async function togglePlay() {
     if (!source) return;
     if (!audio.paused) { audio.pause(); return; }
-    try { await audio.play(); status.textContent = 'С любовью, от первой ноты до последней.'; }
+    try { await audio.play(); status.textContent = ''; }
     catch { status.textContent = 'Не получилось включить запись. Попробуй ещё раз.'; }
   }
   playButton.addEventListener('click', togglePlay);
@@ -504,7 +502,8 @@ function renderInvitation(moment, context) {
     fragment.append(figure);
     const ticket = el('article', 'dinner-ticket');
     const letter = el('div', 'dinner-letter');
-    letter.append(el('p', 'eyebrow', 'У нас с тобой свидание'), el('h2', '', invite.venue), el('p', '', invite.message));
+    letter.append(el('p', 'eyebrow', 'У нас с тобой свидание'), el('h2', '', invite.venue));
+    if (invite.message) letter.append(el('p', '', invite.message));
     letter.append(el('p', 'dinner-love-note', invite.note));
     const details = el('div', 'dinner-details');
     const date = el('time', 'dinner-date', invite.dateLabel);
@@ -607,8 +606,7 @@ function renderInvitation(moment, context) {
       else showQuestion(true);
     });
     card.append(options, feedback, next);
-    const note = el('p', 'quiz-note', 'Можно угадывать и ошибаться. Я буду подсказывать ♡');
-    body.replaceChildren(card, note);
+    body.replaceChildren(card);
     if (focus) focusHeading();
   }
 

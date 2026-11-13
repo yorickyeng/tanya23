@@ -27,7 +27,7 @@ for (const moment of config.moments) {
           question.options.some(option => typeof option !== 'string' || !option.trim()) ||
           !Number.isInteger(question.answer) || question.answer < 0 || question.answer >= question.options.length) throw new Error(`Invalid quiz question: ${question.id}`);
     }
-    if (!invite?.photo?.src || !invite.photo.alt || !invite.venue || !invite.message || !Number.isFinite(Date.parse(invite.startsAt))) throw new Error('Complete the dinner invitation before publishing');
+    if (!invite?.photo?.src || !invite.photo.alt || !invite.venue || !Number.isFinite(Date.parse(invite.startsAt))) throw new Error('Complete the dinner invitation before publishing');
     if (Date.parse(moment.opensAt) >= Date.parse(invite.startsAt)) throw new Error('The invitation must open before dinner');
     for (const url of [invite.mapUrl, invite.photo.sourceUrl, ...invite.sources.map(source => source.url), ...moment.questions.map(question => question.sourceUrl)]) {
       if (new URL(url).protocol !== 'https:') throw new Error('Use HTTPS for invitation references');
