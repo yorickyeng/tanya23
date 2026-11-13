@@ -131,7 +131,6 @@ function widgetShell(moment, context) {
   if (banner) fragment.append(banner);
   const header = el('header', 'widget-header');
   header.append(link('← На главную', route(null), 'back-link'));
-  header.append(el('span', 'wordmark', config.title));
   fragment.append(header);
   const section = el('section', 'widget-intro');
   section.append(el('p', 'eyebrow', moment.eyebrow));
@@ -484,7 +483,9 @@ function renderInvitation(moment, context) {
   }
 
   function showInvitation(focus = false) {
-    intro.querySelector('.eyebrow').textContent = moment.invitation.eyebrow;
+    const eyebrow = intro.querySelector('.eyebrow');
+    eyebrow.textContent = moment.invitation.eyebrow || '';
+    eyebrow.hidden = !moment.invitation.eyebrow;
     intro.querySelector('h1').textContent = moment.invitation.heading;
     intro.querySelector('.intro-description').hidden = true;
     const invite = moment.invitation;
@@ -532,6 +533,7 @@ function renderInvitation(moment, context) {
       step = 0;
       saveStep();
       intro.querySelector('.eyebrow').textContent = moment.eyebrow;
+      intro.querySelector('.eyebrow').hidden = false;
       intro.querySelector('h1').textContent = moment.heading;
       intro.querySelector('.intro-description').hidden = false;
       showQuestion(true);
