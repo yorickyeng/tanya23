@@ -102,7 +102,6 @@ function renderHome(context) {
       list.append(item);
     }
     fragment.append(list);
-    if (!context.archive || context.isReplay) fragment.append(el('p', '', 'Иногда заглядывай сюда снова.'));
   } else {
     fragment.append(el('p', '', context.now < Date.parse(`${config.birthday}T00:00:00+03:00`) ?
       'Здесь пока тихо. Загляни 13 ноября.' : 'Новая маленькая история появится чуть позже.'));
