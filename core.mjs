@@ -45,9 +45,11 @@ export function matchesDateAnswer(answer, acceptedDates) {
   const iso = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   const numeric = value.match(/^(\d{1,2})[.\/\s-]+(\d{1,2})(?:[.\/\s-]+(\d{4}|\d{2}))?\.?$/);
   const november = value.match(/^(\d{1,2})\s+ноябр[яь](?:\s+(\d{4})(?:\s+года?)?)?\.?$/);
+  const compact = value.match(/^(\d{2})(\d{2})(\d{4}|\d{2})?$/);
   let day, month, year;
   if (iso) [, year, month, day] = iso;
   else if (numeric) [, day, month, year] = numeric;
+  else if (compact) [, day, month, year] = compact;
   else if (november) { [, day, year] = november; month = '11'; }
   else return false;
   if (year?.length === 2) year = `20${year}`;
@@ -55,4 +57,29 @@ export function matchesDateAnswer(answer, acceptedDates) {
     const [expectedYear, expectedMonth, expectedDay] = date.split('-').map(Number);
     return Number(day) === expectedDay && Number(month) === expectedMonth && (!year || Number(year) === expectedYear);
   });
+}
+
+export function formatDateInput(value, caret = String(value).length, isPaste = false) {
+  const text = String(value).normalize('NFKC');
+  // Keep previously supported written dates usable when pasted from a message.
+  if (/[^\d\s./-]/u.test(text)) return {value: text, caret: Math.min(caret, text.length)};
+  let digits = text.replace(/\D/g, '');
+  let reordered = false;
+  const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const complete = text.match(/^(\d{1,2})[./\s-]+(\d{1,2})[./\s-]+(\d{4}|\d{2})$/);
+  if (iso) { digits = iso[3] + iso[2] + iso[1]; reordered = true; }
+  else if ((isPaste || caret === text.length) && complete && (complete[1].length < 2 || complete[2].length < 2)) {
+    digits = complete[1].padStart(2, '0') + complete[2].padStart(2, '0') + complete[3];
+    reordered = true;
+  }
+  digits = digits.slice(0, 8);
+  const formatted = [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4)].filter(Boolean).join('.');
+  if (reordered) return {value: formatted, caret: formatted.length};
+  const beforeCaret = Math.min(text.slice(0, caret).replace(/\D/g, '').length, digits.length);
+  let position = 0, seen = 0;
+  while (position < formatted.length && seen < beforeCaret) {
+    if (/\d/.test(formatted[position])) seen++;
+    position++;
+  }
+  return {value: formatted, caret: position};
 }

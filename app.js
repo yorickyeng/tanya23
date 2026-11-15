@@ -1,4 +1,4 @@
-import { getContext, visibleMoments, formatTime, clockTime, mediaURL, matchesDateAnswer } from './core.mjs?v=7';
+import { getContext, visibleMoments, formatTime, clockTime, mediaURL, matchesDateAnswer, formatDateInput } from './core.mjs?v=8';
 
 const app = document.getElementById('app');
 const embedded = document.getElementById('site-content');
@@ -190,7 +190,7 @@ function renderSongGate(moment, context, onUnlock) {
   label.htmlFor = 'kiss-answer';
   const input = el('input', 'kiss-input');
   input.id = 'kiss-answer'; input.type = 'text'; input.autocomplete = 'off';
-  input.placeholder = 'дд.мм.гггг'; input.required = true;
+  input.placeholder = 'дд.мм.гггг'; input.required = true; input.inputMode = 'numeric';
   input.setAttribute('aria-describedby', 'kiss-note');
   const note = el('p', 'kiss-note', 'У этой ночи, кажется, было сразу две даты.');
   note.id = 'kiss-note'; note.setAttribute('aria-live', 'polite');
@@ -199,6 +199,28 @@ function renderSongGate(moment, context, onUnlock) {
   card.setAttribute('aria-labelledby', heading.id);
   card.append(heart, stepLabel, heading, label, input, note, button);
   let step = 'date';
+  function formatDateAnswer(isPaste = false) {
+    const formatted = formatDateInput(input.value, input.selectionStart ?? input.value.length, isPaste);
+    input.value = formatted.value;
+    input.setSelectionRange(formatted.caret, formatted.caret);
+  }
+  input.addEventListener('input', event => {
+    if (step === 'date' && !event.isComposing) formatDateAnswer(event.inputType === 'insertFromPaste');
+  });
+  input.addEventListener('beforeinput', event => {
+    if (step !== 'date' || event.isComposing || input.selectionStart !== input.selectionEnd) return;
+    const position = input.selectionStart;
+    // Deleting next to an automatic dot should remove a digit, not get stuck on the dot.
+    if (event.inputType === 'deleteContentBackward' && position >= 2 && input.value[position - 1] === '.') {
+      event.preventDefault();
+      input.setRangeText('', position - 2, position, 'start');
+      formatDateAnswer();
+    } else if (event.inputType === 'deleteContentForward' && input.value[position] === '.') {
+      event.preventDefault();
+      input.setRangeText('', position, position + 2, 'start');
+      formatDateAnswer();
+    }
+  });
   function shake() {
     card.classList.remove('is-shaking');
     void card.offsetWidth;
@@ -213,7 +235,7 @@ function renderSongGate(moment, context, onUnlock) {
       }
       step = 'time'; stepLabel.textContent = '02 / 02'; heading.textContent = 'А время?';
       label.textContent = 'А во сколько мы поцеловались?';
-      input.value = ''; input.placeholder = 'Хотя бы примерно…'; input.required = false;
+      input.value = ''; input.placeholder = 'Хотя бы примерно…'; input.required = false; input.inputMode = 'text';
       input.removeAttribute('aria-invalid');
       note.textContent = 'До секунды, пожалуйста. Я же всё записывал 😌';
       button.textContent = 'Ну всё, открывай'; shake(); input.focus(); return;
