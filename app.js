@@ -25,7 +25,7 @@ function route(id, search = location.search) {
   const params = new URLSearchParams(search);
   params.delete('id');
   if (id && config?.moments.some(moment => moment.id === id && moment.type === 'game')) {
-    params.set('v', '10');
+    params.set('v', '11');
     return `./game/${params.size ? '?' + params.toString() : ''}`;
   }
   if (id) params.set('id', id);
@@ -48,12 +48,9 @@ function previewBanner(context) {
 }
 
 function modeLinks(context) {
-  if (!context.archive || context.isPreview) return null;
+  if (!context.archive || context.isPreview || !context.isReplay) return null;
   const nav = el('nav', 'archive-nav');
   nav.setAttribute('aria-label', 'Просмотр воспоминаний');
-  nav.append(link('Посмотреть всё', './index.html'));
-  nav.append(document.createTextNode(' · '));
-  nav.append(link('Повторить тот день', './index.html?replay=00%3A00'));
   if (context.isReplay) {
     const label = el('label', 'replay-picker', 'Время в тот день: ');
     const select = el('select');
